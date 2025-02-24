@@ -1,92 +1,24 @@
 <?xml version="1.0"?>
-<sdf version="1.7">
+<sdf version="1.9">
   <world name="drone_world">
-    <!-- Disable gravity since we only move in 2D -->
-    <gravity>0 0 0</gravity>
-    <plugin name= "gz::sim::systems::UserCommands" 
-      filename="gz-sim-user-commands-system">
-    </plugin>
-    
-    
-    <!-- Ground plane -->
-    <model name="ground">
-      <static>true</static>
-      <link name="link">
-        <collision name="collision">
-          <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>10 10</size>
-            </plane>
-          </geometry>
-        </collision>
-        <visual name="visual">
-          <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>10 10</size>
-            </plane>
-          </geometry>
-        </visual>
-      </link>
-    </model>
 
-    <!-- Drone 1 -->
-    <model name="drone_1">
-      <static>false</static>
+    <plugin filename="gz-sim-imu-system"
+            name="gz::sim::systems::Imu">
+    </plugin>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
       <pose>0 0 0.1 0 0 0</pose>
-      <link name="base_link">
-        <collision name="collision">
-          <geometry>
-            <box>
-              <size>0.5 0.5 0.2</size>
-            </box>
-          </geometry>
-        </collision>
-        <visual name="visual">
-          <geometry>
-            <box>
-              <size>0.5 0.5 0.2</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>1 0 0 1</ambient>
-            <diffuse>1 0 0 1</diffuse>
-          </material>
-        </visual>
-      </link>
-      <plugin name="gz::sim::systems::PosePublisher" filename="libgz-sim-pose-publisher-system.so">
-      </plugin>
-      
-    </model>
-    
-    <!-- Drone 2 -->
-    <model name="drone_2">
-      <static>false</static>
+      <uri>model://drone_1</uri>
+    </include>
+
+    <include>
       <pose>1 0 0.1 0 0 0</pose>
-      <link name="base_link">
-        <collision name="collision">
-          <geometry>
-            <box>
-              <size>0.5 0.5 0.2</size>
-            </box>
-          </geometry>
-        </collision>
-        <visual name="visual">
-          <geometry>
-            <box>
-              <size>0.5 0.5 0.2</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0 0 1 1</ambient>
-            <diffuse>0 0 1 1</diffuse>
-          </material>
-        </visual>
-      </link>
-      <plugin name="gz::sim::systems::PosePublisher" filename="libgz-sim-pose-publisher-system.so">
-      </plugin>
-     
-    </model>
+      <uri>model://drone_2</uri>
+    </include>
+
   </world>
 </sdf>
