@@ -1,15 +1,12 @@
-<?xml version="1.0"?>
-<sdf version="1.7">
-  <world name="drone_world">
-    <!-- Disable gravity since we only move in 2D -->
-    <gravity>0 0 0</gravity>
-    <plugin name= "gz::sim::systems::UserCommands" 
-      filename="gz-sim-user-commands-system">
-    </plugin>
-    
-    
-    <!-- Ground plane -->
-    <model name="ground">
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <world name="my_world">
+
+
+ 
+
+    <!-- Directly Defined Ground Plane -->
+    <model name="ground_plane">
       <static>true</static>
       <link name="link">
         <collision name="collision">
@@ -27,14 +24,17 @@
               <size>10 10</size>
             </plane>
           </geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+          </material>
         </visual>
       </link>
     </model>
 
     <!-- Drone 1 -->
-    <model name="drone_1">
+    <model name="drone1">
+      <pose>0 0 1 0 0 0</pose>
       <static>false</static>
-      <pose>0 0 0.1 0 0 0</pose>
       <link name="base_link">
         <collision name="collision">
           <geometry>
@@ -50,20 +50,16 @@
             </box>
           </geometry>
           <material>
-            <ambient>1 0 0 1</ambient>
-            <diffuse>1 0 0 1</diffuse>
+            <ambient>1 0 0 1</ambient> <!-- Red -->
           </material>
         </visual>
       </link>
-      <plugin name="gz::sim::systems::PosePublisher" filename="libgz-sim-pose-publisher-system.so">
-      </plugin>
-      
     </model>
-    
+
     <!-- Drone 2 -->
-    <model name="drone_2">
+    <model name="drone2">
+      <pose>2 0 1 0 0 0</pose>
       <static>false</static>
-      <pose>1 0 0.1 0 0 0</pose>
       <link name="base_link">
         <collision name="collision">
           <geometry>
@@ -79,14 +75,11 @@
             </box>
           </geometry>
           <material>
-            <ambient>0 0 1 1</ambient>
-            <diffuse>0 0 1 1</diffuse>
+            <ambient>0 0 1 1</ambient> <!-- Blue -->
           </material>
         </visual>
       </link>
-      <plugin name="gz::sim::systems::PosePublisher" filename="libgz-sim-pose-publisher-system.so">
-      </plugin>
-     
     </model>
+
   </world>
 </sdf>

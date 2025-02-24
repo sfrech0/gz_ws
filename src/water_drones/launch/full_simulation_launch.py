@@ -25,20 +25,20 @@ def generate_launch_description():
             LogInfo(msg="Bridge 1 starts now..."),
             ExecuteProcess(
                 cmd=["ros2", "run", "ros_gz_bridge", "parameter_bridge", 
-                     "/drone_1/pose@geometry_msgs/msg/PoseStamped@gz.msgs.Pose"],
+                     "/drone_1/pose@geometry_msgs/msg/Pose@gz.msgs.Pose"],
                 output="screen"
             ),
 
             LogInfo(msg="Bridge 2 starts now..."),
             ExecuteProcess(
                 cmd=["ros2", "run", "ros_gz_bridge", "parameter_bridge",
-                     "/drone_2/pose@geometry_msgs/msg/PoseStamped@gz.msgs.Pose"],
+                     "/drone_2/pose@geometry_msgs/msg/Pose@gz.msgs.Pose"],
                 output="screen"
             ),
 
             LogInfo(msg="Publisher starts now..."),
             ExecuteProcess(
-                cmd=["ros2", "run", "water_drones", "csv_publisher"],
+                cmd=["ros2", "run", "water_drones", "csv_to_ros"],
                 output= "screen"
             )
         ]
