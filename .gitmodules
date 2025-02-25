@@ -1,0 +1,3 @@
+[submodule "src/asv_wave_sim"]
+	path = src/asv_wave_sim
+	url = https://github.com/srmainwaring/asv_wave_sim.git
