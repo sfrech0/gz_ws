@@ -2,8 +2,8 @@
 <sdf version="1.9">
   <world name="drone_world">
 
-    <plugin filename="gz-sim-imu-system"
-            name="gz::sim::systems::Imu">
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
     </plugin>
 
     <include>
