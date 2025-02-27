@@ -18,7 +18,7 @@ class CSVPublisher(Node):
 
         # Create a publisher for each drone
         for drone_id in self.csv_data["drone_id"].unique():
-            topic_name = f"/drone_{drone_id}/pose"
+            topic_name = f"/{drone_id}/pose"
             self.drone_publishers[drone_id] = self.create_publisher(PoseStamped, topic_name, 10)
             self.get_logger().info(f"Publisher created for {topic_name}")
 

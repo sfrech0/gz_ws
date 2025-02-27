@@ -14,7 +14,10 @@
     </plugin>
     <plugin filename="gz-sim-user-commands-system"
             name="gz::sim::systems::UserCommands">
+      <!-- <cmd_topic>/duck/cmd</cmd_topic>
+      <entity_name>duck</entity_name> -->
     </plugin>
+    
     <plugin filename="gz-sim-imu-system"
             name="gz::sim::systems::Imu">
     </plugin>
@@ -32,6 +35,8 @@
       <specular>0.6 0.6 0.6 1</specular>
       <direction>-0.5 0.1 -0.9</direction>
     </light>
+
+    <!-- Disable gravity if waves are not used -->
     <gravity> 0 0 0 </gravity>
 
     <!-- <include>
@@ -91,15 +96,28 @@
       </link>
     </model>
     
-    <!-- <include>
+    <include>
       <pose>0 0 0 0 0 0</pose>
       <uri>model://drone_1</uri>
-    </include> -->
+    </include>
 
     <include>
+      <pose>1 1 0 0 0 0</pose>
+      <uri>model://drone_2</uri>
+    </include>
+
+
+    <!-- <include>
       <pose>0 0 0 0 0 3.14</pose>
       <uri>model://duck</uri>
-    </include>
+      <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
+        <control>
+          <type>COMMAND</type>
+          <cmd_topic>/model/duck/cmd</cmd_topic>
+        </control>
+      </plugin>
+    </include> -->
 
     <!-- <include>
       <pose>0 5 0 0 0 0</pose>

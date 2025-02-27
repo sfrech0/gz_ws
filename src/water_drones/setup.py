@@ -24,11 +24,11 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            # 'csv_publisher = water_drones.csv_publisher:main',
+            'csv_publisher = water_drones.csv_publisher:main',
             # 'drone_state_updater = water_drones.drone_state_updater:main',
             # 'drone_client = water_drones.drone_client:main',
             # 'test_script = water_drones.test:main',
-            'csv_to_ros = water_drones.csv_to_ros:main',
+            'pose_to_gz = water_drones.pose_to_gz:main',
         ],
     },
 )
