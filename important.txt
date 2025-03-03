@@ -1,0 +1,12 @@
+gz service -s /world/drone_world/set_pose --reqtype gz.msgs.Pose --reptype gz.msgs.Boolean --timeout 2000 --req 'name: "drone_1", position: {x: 1, y: 1, z:0.1}'
+
+export GZ_SIM_RESOURCE_PATH=$HOME/gz_ws/src/water_drones/models
+
+export GZ_SIM_SYSTEM_PLUGIN_PATH=$GZ_SIM_SYSTEM_PLUGIN_PATH:$HOME/gz_ws/install/lib:$HOME/gz_ws/install/pure_pursuit_controller/lib:$HOME/gz_ws/install/gz-waves1/lib:$HOME/gz_ws/install/gz_ros2_bridge/lib
+
+export GZ_GUI_PLUGIN_PATH=$HOME/gz_ws/src/asv_wave_sim/gz-waves/src/gui/plugins/waves_control/build:$GZ_GUI_PLUGIN_PATH
+
+export GZ_SIM_RESOURCE_PATH=$HOME/gz_ws/src/asv_wave_sim/gz-waves-models/models:$HOME/gz_ws/src/asv_wave_sim/gz-waves-models/world_models:$HOME/gz_ws/src/asv_wave_sim/gz-waves-models/worlds
+
+source ./install/setup.bash
+
