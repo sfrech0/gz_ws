@@ -1,15 +1,17 @@
 import pandas as pd
 import numpy as np
 import casadi as ca
+import sys
 
 # Parameters
-drone_radius = 0.5  # Define the minimum safety radius for drones
+drone_radius = 0.3  # Define the minimum safety radius for drones
 max_velocity = 2.0  # Max velocity constraint (m/s)
 max_acceleration = 1.0  # Max acceleration constraint (m/s^2)
 
 def read_csv(file_path):
     """Read the drone trajectory CSV file."""
     df = pd.read_csv(file_path)
+    print("read in the csv file")
     return df
 
 def check_collisions(df):
@@ -90,6 +92,16 @@ def main(input_file, output_file):
     
     df.to_csv(output_file, index=False)
     print("Updated trajectory saved to", output_file)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python3 file.py <arg1> <arg2>")
+        sys.exit(1)
+    
+    arg1 = sys.argv[1]
+    arg2 = sys.argv[2]
+    main(arg1, arg2)
 
 # Example usage
 # main("input.csv", "output.csv")
