@@ -26,6 +26,10 @@ def check_collisions(df):
                     collisions.append((t, snapshot.iloc[i]['drone_id'], snapshot.iloc[j]['drone_id']))
     return collisions
 
+def safe_norm2(a, b, epsilon=1e-6):
+    return ca.sqrt(a**2 + b**2 + epsilon)
+
+
 def test_fun(df):
     for t in range(1, len(df['timestamp'].unique())):
         print(df[(df['timestamp'] == df['timestamp'].unique()[t]) & (df['drone_id'] == 'drone_1')]['y'].values[0])
@@ -42,22 +46,37 @@ def mpc_optimization(df):
     delta_t = 3
     
     # Define optimization variables
-    x = ca.MX.sym('x', num_drones, timesteps)
-    y = ca.MX.sym('y', num_drones, timesteps)
-    v_x = ca.MX.sym('v_x', num_drones, timesteps)
-    v_y = ca.MX.sym('v_y', num_drones, timesteps)
+    opti = ca.Opti()
+    x = opti.variable(num_drones, timesteps)
+    y = opti.variable(num_drones, timesteps)
+    v_x = opti.variable(num_drones, timesteps)
+    v_y = opti.variable(num_drones, timesteps)
     
     # Define cost function
     cost = 0
-    constraints = []
     
+    # Example for initial guess: use the first timestamp values from your CSV
+    for i in range(num_drones):
+        init_x = df[(df['timestamp'] == df['timestamp'].unique()[0]) & (df['drone_id'] == drone_ids[i])]['x'].values[0]
+        init_y = df[(df['timestamp'] == df['timestamp'].unique()[0]) & (df['drone_id'] == drone_ids[i])]['y'].values[0]
+        opti.set_initial(x[i, 0], init_x)
+        opti.set_initial(y[i, 0], init_y)
+        for t in range(1, timesteps):
+            # Propagate initial guess (could be a constant guess or a simple propagation)
+            opti.set_initial(x[i, t], init_x)
+            opti.set_initial(y[i, t], init_y)
+            opti.set_initial(v_x[i, t-1], 0)
+            opti.set_initial(v_y[i, t-1], 0)
+
+
     for t in range(1, timesteps):
         for i in range(num_drones):
             # Motion model constraints
-            constraints.append(x[i, t] == x[i, t-1] + v_x[i, t-1] * delta_t)
-            constraints.append(y[i, t] == y[i, t-1] + v_y[i, t-1] * delta_t)
-            # constraints.append(ca.norm_2([v_x[i, t], v_y[i, t]]) <= max_velocity)
-            constraints.append((np.sqrt(v_x[i, t]**2 + v_y[i, t]**2)) <= max_velocity)
+            opti.subject_to(x[i, t] == x[i, t-1] + v_x[i, t-1] * delta_t)
+            opti.subject_to(y[i, t] == y[i, t-1] + v_y[i, t-1] * delta_t)
+
+            # velocity constraints
+            opti.subject_to(safe_norm2(v_x[i, t], v_y[i, t]) <= max_velocity)
 
             
             # Smoothness constraint (minimize acceleration)
@@ -77,27 +96,40 @@ def mpc_optimization(df):
             for j in range(i+1, num_drones):
                 delta_x = x[i, t] - x[j, t]
                 delta_y = y[i, t] - y[j, t]
-                # constraints.append(ca.norm_2([x[i, t] - x[j, t], y[i, t] - y[j, t]]) >= 2 * drone_radius)
-                constraints.append((np.sqrt(delta_x**2 + delta_y**2)) >= 2*drone_radius)
+                epsilon = 1e-3  # A small margin
+                opti.subject_to(safe_norm2(delta_x, delta_y) >= 2*drone_radius + epsilon)  
     
-    print(f"cost function: \n{cost}")
+    print(f"opti is: \n{opti}")
+
+    # minimize the cost function
+    opti.minimize(cost)
+
+    # solver settings
+    opti.solver('ipopt')
+
+    # solve
+    sol = opti.solve()
+
+    # extract the results
+    x_solution = sol.value(x)
+    y_solution = sol.value(y)
+    v_x_solution = sol.value(v_x)
+    v_y_solution = sol.value(v_y)
 
     # Solve optimization problem
-    opt_variables = ca.vertcat(x.reshape((-1, 1)), y.reshape((-1, 1)), v_x.reshape((-1, 1)), v_y.reshape((-1, 1)))
+    # opt_variables = ca.vertcat(x.reshape((-1, 1)), y.reshape((-1, 1)), v_x.reshape((-1, 1)), v_y.reshape((-1, 1)))
     
-    nlp = {'x': opt_variables, 'f': cost, 'g': ca.vertcat(*constraints)}
-    solver = ca.qpsol('solver', 'qpoases', nlp)
-    solution = solver(lbx=-ca.inf, ubx=ca.inf, lbg=0, ubg=ca.inf)
+    # nlp = {'x': opt_variables, 'f': cost, 'g': ca.vertcat(*constraints)}
+    # solver = ca.nlpsol('solver', 'ipopt', nlp)
+    # solution = solver(lbx=-ca.inf, ubx=ca.inf, lbg=0, ubg=ca.inf)
     
-    x_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 0]
-    y_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 1]
-    v_x_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 2]
-    v_y_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 3]
+    # x_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 0]
+    # y_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 1]
+    # v_x_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 2]
+    # v_y_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 3]
     df['v_x'] = timesteps*num_drones*[None]
     df['v_y'] = timesteps*num_drones*[None]
     
-    # print(f"he solution is: \n {solution}")
-
     # Update dataframe with new values
     for i, drone_id in enumerate(drone_ids):
         df.loc[df['drone_id'] == drone_id, 'x'] = x_solution[i]
