@@ -26,11 +26,20 @@ def check_collisions(df):
                     collisions.append((t, snapshot.iloc[i]['drone_id'], snapshot.iloc[j]['drone_id']))
     return collisions
 
+def test_fun(df):
+    for t in range(1, len(df['timestamp'].unique())):
+        print(df[(df['timestamp'] == df['timestamp'].unique()[t]) & (df['drone_id'] == 'drone_1')]['y'].values[0])
+
+    return
+
+
+
 def mpc_optimization(df):
     """Perform MPC-based collision avoidance."""
     timesteps = len(df['timestamp'].unique())
     drone_ids = df['drone_id'].unique()
     num_drones = len(drone_ids)
+    delta_t = 3
     
     # Define optimization variables
     x = ca.MX.sym('x', num_drones, timesteps)
@@ -45,13 +54,18 @@ def mpc_optimization(df):
     for t in range(1, timesteps):
         for i in range(num_drones):
             # Motion model constraints
-            constraints.append(x[i, t] == x[i, t-1] + v_x[i, t-1])
-            constraints.append(y[i, t] == y[i, t-1] + v_y[i, t-1])
-            constraints.append(ca.norm_2([v_x[i, t], v_y[i, t]]) <= max_velocity)
+            constraints.append(x[i, t] == x[i, t-1] + v_x[i, t-1] * delta_t)
+            constraints.append(y[i, t] == y[i, t-1] + v_y[i, t-1] * delta_t)
+            # constraints.append(ca.norm_2([v_x[i, t], v_y[i, t]]) <= max_velocity)
+            constraints.append((np.sqrt(v_x[i, t]**2 + v_y[i, t]**2)) <= max_velocity)
+
             
             # Smoothness constraint (minimize acceleration)
-            if t > 1:
-                constraints.append(ca.norm_2([v_x[i, t] - v_x[i, t-1], v_y[i, t] - v_y[i, t-1]]) <= max_acceleration)
+            # if t > 1:
+            #     delta_x = v_x[i, t] - v_x[i, t-1]
+            #     delta_y = v_y[i, t] - v_y[i, t-1]
+            #     # constraints.append(ca.norm_2([v_x[i, t] - v_x[i, t-1], v_y[i, t] - v_y[i, t-1]]) <= max_acceleration)
+            #     constraints.append((np.sqrt(delta_x**2 + delta_y**2)) <= max_acceleration)
             
             # Cost function: deviation from original trajectory
             target_x = df[(df['timestamp'] == df['timestamp'].unique()[t]) & (df['drone_id'] == drone_ids[i])]['x'].values[0]
@@ -61,22 +75,35 @@ def mpc_optimization(df):
         # Collision avoidance constraints
         for i in range(num_drones):
             for j in range(i+1, num_drones):
-                constraints.append(ca.norm_2([x[i, t] - x[j, t], y[i, t] - y[j, t]]) >= 2 * drone_radius)
+                delta_x = x[i, t] - x[j, t]
+                delta_y = y[i, t] - y[j, t]
+                # constraints.append(ca.norm_2([x[i, t] - x[j, t], y[i, t] - y[j, t]]) >= 2 * drone_radius)
+                constraints.append((np.sqrt(delta_x**2 + delta_y**2)) >= 2*drone_radius)
     
+    print(f"cost function: \n{cost}")
+
     # Solve optimization problem
     opt_variables = ca.vertcat(x.reshape((-1, 1)), y.reshape((-1, 1)), v_x.reshape((-1, 1)), v_y.reshape((-1, 1)))
     
     nlp = {'x': opt_variables, 'f': cost, 'g': ca.vertcat(*constraints)}
-    solver = ca.nlpsol('solver', 'ipopt', nlp)
+    solver = ca.qpsol('solver', 'qpoases', nlp)
     solution = solver(lbx=-ca.inf, ubx=ca.inf, lbg=0, ubg=ca.inf)
     
     x_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 0]
     y_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 1]
+    v_x_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 2]
+    v_y_solution = np.array(solution['x']).reshape((num_drones, timesteps, 4))[:, :, 3]
+    df['v_x'] = timesteps*num_drones*[None]
+    df['v_y'] = timesteps*num_drones*[None]
     
+    # print(f"he solution is: \n {solution}")
+
     # Update dataframe with new values
     for i, drone_id in enumerate(drone_ids):
         df.loc[df['drone_id'] == drone_id, 'x'] = x_solution[i]
         df.loc[df['drone_id'] == drone_id, 'y'] = y_solution[i]
+        df.loc[df['drone_id'] == drone_id, 'v_x'] = v_x_solution[i]
+        df.loc[df['drone_id'] == drone_id, 'v_y'] = v_y_solution[i]
     
     return df
 
@@ -87,6 +114,7 @@ def main(input_file, output_file):
     if collisions:
         print("Collisions detected! Running MPC...")
         df = mpc_optimization(df)
+        # test_fun(df)
     else:
         print("No collisions detected.")
     
