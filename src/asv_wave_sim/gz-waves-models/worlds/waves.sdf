@@ -12,11 +12,11 @@
     <plugin filename="gz-sim-scene-broadcaster-system"
             name="gz::sim::systems::SceneBroadcaster">
     </plugin>
-    <plugin filename="gz-sim-user-commands-system"
+    <!-- <plugin filename="gz-sim-user-commands-system"
             name="gz::sim::systems::UserCommands">
-      <!-- <cmd_topic>/duck/cmd</cmd_topic>
-      <entity_name>duck</entity_name> -->
-    </plugin>
+      <cmd_topic>/duck/cmd</cmd_topic>
+      <entity_name>duck</entity_name>
+    </plugin> -->
     
     <plugin filename="gz-sim-imu-system"
             name="gz::sim::systems::Imu">
@@ -99,12 +99,29 @@
     <include>
       <pose>0 0 0 0 0 0</pose>
       <uri>model://drone_1</uri>
+      <plugin filename="gz-sim-user-commands-system"
+              name="gz::sim::systems::UserCommands">
+        <control>
+          <type>VELOCITY</type>
+          <cmd_topic>/world/drone_1/cmd_vel</cmd_topic>
+          <link_name>base_link</link_name>
+        </control>
+      </plugin>
     </include>
 
     <include>
       <pose>1 1 0 0 0 0</pose>
       <uri>model://drone_2</uri>
+      <!-- <plugin filename="gz-sim-user-commands-system"
+              name="gz::sim::systems::UserCommands">
+        <control>
+          <type>VELOCITY</type>
+          <cmd_topic>/world/drone_2/cmd_vel</cmd_topic>
+          <link_name>base_link</link_name>
+        </control>
+      </plugin> -->
     </include>
+
 
 
     <!-- <include>
