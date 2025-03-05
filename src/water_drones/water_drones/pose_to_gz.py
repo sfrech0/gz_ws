@@ -5,25 +5,33 @@ from geometry_msgs.msg import PoseStamped
 import subprocess
 
 class DroneToGazebo(Node):
-    def __init__(self):
+    def __init__(self, models):
         super().__init__('drone_to_gazebo')
-        # Subscribe to the drone's pose topic (PoseStamped message).
-        self.subscription = self.create_subscription(
-            PoseStamped,
-            '/drone_1/pose',
-            self.pose_callback,
-            10
-        )
-        self.get_logger().info("Subscribed to /drone_1/pose.")
 
-    def pose_callback(self, msg: PoseStamped):
+        self.models = models
+
+        # Subscribe to the drone's pose topic (PoseStamped message).
+        self.subscription = {
+            model: self.create_subscription(
+                PoseStamped,
+                f'/{model}/pose',
+                lambda msg, model=model: self.pose_callback(msg, model),
+                10
+            )
+            for model in models
+            # self.get_logger().info(f"Subscribed to /{model}/pose.")
+        }
+            
+            
+
+    def pose_callback(self, msg, model):
         self.get_logger().info("Received new PoseStamped message. Forwarding to Gazebo...")
         # Extract the pose from the PoseStamped message.
         pose = msg.pose
 
         # Build the YAML string required by the Gazebo service.
         request_yaml = (
-            "name: 'drone_1', position: {" + f"x: {pose.position.x}, y: {pose.position.y}" + "}"
+            f"name: '{model}'," + "  position: {" + f"x: {pose.position.x}, y: {pose.position.y}" + "}"
             # "position: "
             # f"x: {pose.position.x},"
             # f"y: {pose.position.y}\n"
@@ -47,7 +55,11 @@ class DroneToGazebo(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = DroneToGazebo()
+
+    models = [
+        "drone_1", "drone_2"
+    ]
+    node = DroneToGazebo(models)
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

@@ -11,7 +11,7 @@ class CSVPublisher(Node):
         super().__init__('csv_publisher')
 
         # Load CSV file
-        self.csv_data = pd.read_csv("/home/sfr/gz_ws/src/water_drones/data/drone_position.csv")
+        self.csv_data = pd.read_csv("/home/sfr/gz_ws/src/water_drones/data/adjusted.csv")
 
         # Initialize publishers dictionary
         self.drone_publishers = {}
