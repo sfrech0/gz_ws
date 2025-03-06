@@ -21,16 +21,13 @@
           <diffuse>1 0 0 1</diffuse>
         </material>
       </visual>
+
+      <sensor name="imu_sensor" type="imu">
+        <pose>0 0 0 3.141593 0 0</pose>
+        <always_on>1</always_on>
+        <update_rate>1000.0</update_rate>
+      </sensor>
+
     </link>
-
-    <plugin filename="gz-sim-user-commands-system" 
-            name="gz::sim::systems::UserCommands">
-      <control>
-        <type>VELOCITY</type>
-        <cmd_topic>/world/drone_2/cmd_vel</cmd_topic>
-        <link_name>base_link</link_name>
-      </control>
-    </plugin>
-
   </model>
 </sdf>
