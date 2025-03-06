@@ -97,11 +97,6 @@
     <include>
       <pose>0 0 0 0 0 0</pose>
       <uri>model://drone_1</uri>
-      <plugin name="ArduPilotPlugin" filename="ArduPilotPlugin">
-        <vehicle_id>1</vehicle_id>
-        <link_name>base_link</link_name>
-        <mavlink_udp_port>14540</mavlink_udp_port>
-      </plugin>
     </include>
 
 

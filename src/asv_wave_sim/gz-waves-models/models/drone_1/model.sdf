@@ -30,7 +30,18 @@
 
     </link>  
 
-    
+    <!-- ArduPilot Plugin -->
+    <plugin name="ArduPilotPlugin" filename="ArduPilotPlugin">
+      <fdm_addr>127.0.0.1</fdm_addr>
+      <fdm_port_in>9002</fdm_port_in>
+      <connectionTimeoutMaxCount>5</connectionTimeoutMaxCount>
+      <lock_step>1</lock_step>
+      <modelXYZToAirplaneXForwardZDown>0 0 0 3.141593 0 0</modelXYZToAirplaneXForwardZDown>
+      <gazeboXYZToNED>0 0 0 3.141593 0 1.57079632</gazeboXYZToNED>
+      <imuName>imu_sensor</imuName>
+      <mavlink_udp_port>14540</mavlink_udp_port>
+      <mavlink_udp_address>127.0.0.1</mavlink_udp_address>
+    </plugin>
 
   </model>
 </sdf>
