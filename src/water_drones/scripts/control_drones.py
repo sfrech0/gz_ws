@@ -141,6 +141,24 @@ def send_mavlink_command(connection, pos, vel, time_boot_ms, system_id):
         0, 0                      # yaw and yaw_rate (ignored)
     )
 
+def send_mavlink_new(connection, pos, vel, time_boot_ms, system_id):
+    """
+    Sends a SET_POSITION_TARGET_LOCAL_NED message with the given position and velocity.
+    """
+    message = connection.set_position_target_local_ned(
+        time_boot_ms,
+        system_id,
+        1,                        # target component
+        COORDINATE_FRAME,
+        TYPE_MASK, 
+        pos[0], pos[1], FIXED_Z,  # positions (x, y, z)
+        vel[0], vel[1], 0.0,      # velocities (vx, vy, vz)
+        0, 0, 0,                  # accelerations (ignored)
+        0, 0                      # yaw and yaw_rate (ignored)
+    )
+    connection.mav.send(message)
+
+
 # ----- Main Control Loop -----
 
 def main():
@@ -155,10 +173,13 @@ def main():
     for drone_id, connection_string in DRONE_CONNECTIONS.items():
         print(f"Connecting to drone {drone_id} on {connection_string}...")
         conn = mavutil.mavlink_connection(connection_string)
-        conn.wait_heartbeat(timeout=30)
+        # conn.wait_heartbeat(timeout=30)
+        conn.wait_heartbeat()
         system_id = DRONE_SYSTEM_IDS.get(drone_id, 1)
         conn.target_system = system_id
         print(f"Drone {drone_id} connected with system ID {system_id}.")
+
+        # necessary ?????????????
         set_guided_mode(conn, system_id)
         drone_links[drone_id] = conn
 
@@ -185,7 +206,7 @@ def main():
                 pos, vel = interpolate_command(cmd_list, current_sim_time + start_time)
                 time_boot_ms = int((time.time() - sim_start) * 1000)
                 if drone_id in drone_links:
-                    send_mavlink_command(drone_links[drone_id], pos, vel, time_boot_ms,
+                    send_mavlink_new(drone_links[drone_id], pos, vel, time_boot_ms,
                                          drone_links[drone_id].target_system)
                     print(f"Sent to {drone_id}: pos={pos}, vel={vel}, sim_t={current_sim_time:.2f}")
                 else:

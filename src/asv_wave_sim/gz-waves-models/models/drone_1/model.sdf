@@ -41,7 +41,13 @@
       <imuName>imu_sensor</imuName>
       <mavlink_udp_port>14540</mavlink_udp_port>
       <mavlink_udp_address>127.0.0.1</mavlink_udp_address>
+      <control>
+        <linkName>base_link</linkName>
+      </control>
     </plugin>
+
+
+    <!-- maybe add a joint, such that it can be used under the control part -->
 
   </model>
 </sdf>
