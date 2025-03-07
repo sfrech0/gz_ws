@@ -94,9 +94,14 @@
       </link>
     </model>
     
-    <include>
+    <!-- <include>
       <pose>0 0 0 0 0 0</pose>
       <uri>model://drone_1</uri>
+    </include> -->
+
+    <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://wow_craft</uri>
     </include>
 
 
