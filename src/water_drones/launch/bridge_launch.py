@@ -53,7 +53,7 @@ def generate_launch_description():
             output='screen',
         ),
         Node(
-            package='gz_ros2_bridge',
+            package='scripts',
             executable='imu_pose_to_odometry',
             name='imu_pose_to_odometry',
             output='screen',
