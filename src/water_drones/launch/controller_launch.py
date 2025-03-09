@@ -15,14 +15,14 @@ def generate_launch_description():
         )
     ]
 
-    bridge = [
-        Node(
-            package='launch',
-            executable='bridge_launch',
-            name='bridge_launch',
-            output='screen',
-        )
-    ]
+    # bridge = [
+    #     Node(
+    #         package='launch',
+    #         executable='bridge_launch',
+    #         name='bridge_launch',
+    #         output='screen',
+    #     )
+    # ]
 
     controller = [
         Node(
@@ -33,4 +33,4 @@ def generate_launch_description():
         )
     ]
 
-    return LaunchDescription(motor + bridge + controller)
+    return LaunchDescription(motor +  controller) #bridge +

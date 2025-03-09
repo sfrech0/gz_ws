@@ -35,12 +35,12 @@
     </light>
 
     <!-- Disable gravity if waves are not used -->
-    <gravity> 0 0 0 </gravity>
+    <!-- <gravity> 0 0 0 </gravity> -->
 
-    <!-- <include>
+    <include>
       <pose>0 0 0 0 0 0</pose>
       <uri>model://waves</uri>
-    </include> -->
+    </include>
 
     <!-- ENU axes -->
     <model name="axes">
@@ -105,10 +105,10 @@
     </include>
 
 
-    <include>
+    <!-- <include>
       <pose>1 1 0 0 0 0</pose>
       <uri>model://drone_2</uri>
-    </include>
+    </include> -->
 
 
 
