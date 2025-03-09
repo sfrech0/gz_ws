@@ -2,14 +2,42 @@ import pandas as pd
 import numpy as np
 import casadi as ca
 import sys
+import os
+from pathlib import Path
+
+
+
+### Steps to go ###
+# - Ask user which csv file to read in
+#       directly search in /home/sfr/gz_ws/src/water_drones/data
+#       maybe return the available files (not important)
+# - Ask the user whether collision should be checked:
+#       No:  - hand the csv file over to the controller (actually timed_pursuit_controller)
+#       Yes: - check for collisions, return the result (collision or no collision)
+#               - No Collision => Hand the original csv file over to the controller
+#               - Collision => Do an optimization (MPC) and hand a optimized csv file over to the controller  
+
 
 # Parameters
 drone_radius = 0.3  # Define the minimum safety radius for drones
 max_velocity = 2.0  # Max velocity constraint (m/s)
 max_acceleration = 1.0  # Max acceleration constraint (m/s^2)
 
-def read_csv(file_path):
+# def read_csv(file_path):
+def read_csv():
     """Read the drone trajectory CSV file."""
+    print("Which file do you want to read in? \nYou have the following options: \n")
+    script_path = Path(__file__).resolve()
+    data_folder = script_path.parent.parent / "data"
+    files = [f.name for f in data_folder.iterdir() if f.is_file()]
+    print(files)
+    print("Please enter the entire name of the file you want to use from the list above")
+    user_input = input()
+    while not (Path.exists(data_folder / user_input)):
+        print("Invalid input. Try again.")
+        user_input = input()
+
+    file_path = data_folder / user_input
     df = pd.read_csv(file_path)
     print("read in the csv file")
     return df
@@ -31,9 +59,9 @@ def safe_norm2(a, b, epsilon=1e-6):
 
 
 def test_fun(df):
-    for t in range(1, len(df['timestamp'].unique())):
-        print(df[(df['timestamp'] == df['timestamp'].unique()[t]) & (df['drone_id'] == 'drone_1')]['y'].values[0])
-
+    # for t in range(1, len(df['timestamp'].unique())):
+    #     print(df[(df['timestamp'] == df['timestamp'].unique()[t]) & (df['drone_id'] == 'drone_1')]['y'].values[0])
+    print("Finished")
     return
 
 
@@ -139,29 +167,48 @@ def mpc_optimization(df):
     
     return df
 
-def main(input_file, output_file):
-    df = read_csv(input_file)
-    collisions = check_collisions(df)
-    
-    if collisions:
-        print("Collisions detected! Running MPC...")
-        df = mpc_optimization(df)
-        # test_fun(df)
+# def main(input_file, output_file):
+def main():
+
+    df = read_csv()
+    print("Do you want to analyse whether there is a collision in your file or not?")
+    input_var = input('y/n? \n')
+
+    if input_var == 'y':
+        print("Collisions will be checked")
+        collisions = check_collisions(df)
+        if collisions:
+            print("Collisions detected! Running MPC...")
+            df = mpc_optimization(df)
+        else:
+            print("No collisions detected.")
     else:
-        print("No collisions detected.")
+        print("csv will be handed directly to path controller")
+
+
+    # df = read_csv(input_file)
+    # collisions = check_collisions(df)
     
-    df.to_csv(output_file, index=False)
-    print("Updated trajectory saved to", output_file)
+    # if collisions:
+    #     print("Collisions detected! Running MPC...")
+    #     df = mpc_optimization(df)
+    #     # test_fun(df)
+    # else:
+    #     print("No collisions detected.")
+    
+    # df.to_csv(output_file, index=False)
+    # print("Updated trajectory saved to", output_file)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python3 file.py <arg1> <arg2>")
-        sys.exit(1)
+    # if len(sys.argv) != 3:
+    #     print("Usage: python3 file.py <arg1> <arg2>")
+    #     sys.exit(1)
     
-    arg1 = sys.argv[1]
-    arg2 = sys.argv[2]
-    main(arg1, arg2)
+    # arg1 = sys.argv[1]
+    # arg2 = sys.argv[2]
+    # main(arg1, arg2)
+    main()
 
 # Example usage
 # main("input.csv", "output.csv")
