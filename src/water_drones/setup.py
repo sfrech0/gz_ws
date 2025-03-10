@@ -32,7 +32,7 @@ setup(
             'motor_controller = water_drones.motor_controller:main',
             'imu_pose_to_odometry = water_drones.imu_pose_to_odometry:main',
             'timed_pursuit_node = water_drones.timed_pursuit_node:main',
-            'exit_plan = scripts.exit_plan:main'
+            'exit_plan = water_drones.exit_plan:main'
         ],
     },
 )
