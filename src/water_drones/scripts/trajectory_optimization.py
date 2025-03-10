@@ -82,19 +82,6 @@ def mpc_optimization(df):
     
     # Define cost function
     cost = 0
-    
-    # Example for initial guess: use the first timestamp values from your CSV
-    for i in range(num_drones):
-        init_x = df[(df['timestamp'] == df['timestamp'].unique()[0]) & (df['drone_id'] == drone_ids[i])]['x'].values[0]
-        init_y = df[(df['timestamp'] == df['timestamp'].unique()[0]) & (df['drone_id'] == drone_ids[i])]['y'].values[0]
-        opti.set_initial(x[i, 0], init_x)
-        opti.set_initial(y[i, 0], init_y)
-        for t in range(1, timesteps):
-            # Propagate initial guess (could be a constant guess or a simple propagation)
-            opti.set_initial(x[i, t], init_x)
-            opti.set_initial(y[i, t], init_y)
-            opti.set_initial(v_x[i, t-1], 0)
-            opti.set_initial(v_y[i, t-1], 0)
 
 
     for t in range(1, timesteps):
