@@ -180,6 +180,9 @@ def main():
         if collisions:
             print("Collisions detected! Running MPC...")
             df = mpc_optimization(df)
+            df_name = input('Define a name for the adjusted csv file (with .csv). \n')
+            file_path = Path(__file__).resolve().parent.parent / "data" / df_name
+            df.to_csv(file_path, index=False)
         else:
             print("No collisions detected.")
     else:
